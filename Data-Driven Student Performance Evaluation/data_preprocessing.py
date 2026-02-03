@@ -14,6 +14,7 @@ def cleaning(Dataframe):
         #step2 - Encoding
         Encoded = OrdinalEncoder()
         target = df.columns[-1]
+        cat_cols = cat_cols.drop(target)
         df[target] = Encoded.fit_transform(df[[target]])
         df[cat_cols] = Encoded.fit_transform(df[cat_cols])
 
@@ -21,6 +22,7 @@ def cleaning(Dataframe):
 
         X = df.iloc[ :, :-1]  # All columns except last
         y = df.iloc[ :, -1]   # last column
+        num_cols = X.select_dtypes(include="number").columns
 
         X_train , X_test , y_train , y_test = train_test_split( X, y, test_size=0.2, random_state=42)
 
