@@ -3,7 +3,7 @@ from sklearn.preprocessing import MinMaxScaler , OrdinalEncoder
 from sklearn.model_selection import train_test_split 
 
 # Step1 - Reading the CSV and making a dataset
-df = pd.read_csv("Sample.csv")
+df = pd.read_csv("Preprocessing\Sample.csv")
 print(df)
 # Step 2 - Finding the number of missing values in each column.
 print(df.isnull().sum())
