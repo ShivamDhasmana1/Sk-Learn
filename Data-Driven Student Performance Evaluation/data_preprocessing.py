@@ -6,23 +6,17 @@ def cleaning(Dataframe):
         df = Dataframe.copy()
 
         # Step1 - Finding and filling missing values
-        num_cols = df.select_dtypes(include="number").columns
-        cat_cols = df.select_dtypes(include="object").columns
+        num_cols = ["Study_Hours","Attendance","Previous_Score"]
         df[num_cols] = df[num_cols].fillna(df[num_cols].mean())
-        df[cat_cols] = df[cat_cols].fillna("Unknown")
 
         #step2 - Encoding
         Encoded = OrdinalEncoder()
-        target = df.columns[-1]
-        cat_cols = cat_cols.drop(target)
-        df[target] = Encoded.fit_transform(df[[target]])
-        df[cat_cols] = Encoded.fit_transform(df[cat_cols])
+        target = "Passed"
+        df[[target]] = Encoded.fit_transform(df[[target]])
 
         # Step3 - train test and split
-
-        X = df.iloc[ :, :-1]  # All columns except last
-        y = df.iloc[ :, -1]   # last column
-        num_cols = X.select_dtypes(include="number").columns
+        X = df[num_cols]
+        y = df[target]
 
         X_train , X_test , y_train , y_test = train_test_split( X, y, test_size=0.2, random_state=42)
 
