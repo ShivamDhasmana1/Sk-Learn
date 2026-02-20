@@ -1,28 +1,45 @@
 import pandas as pd
-from sklearn.preprocessing import StandardScaler , OrdinalEncoder
-from sklearn.model_selection import train_test_split 
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder
+from sklearn.model_selection import train_test_split
 
-def cleaning(Dataframe):
-        df = Dataframe.copy()
 
-        # Step1 - Finding and filling missing values
-        num_cols = ["Study_Hours","Attendance","Previous_Score"]
-        df[num_cols] = df[num_cols].fillna(df[num_cols].mean())
-
-        #step2 - Encoding
-        Encoded = OrdinalEncoder()
+def cleaning(dataframe):
+        df = dataframe.copy()
+        
+        # Remove irrelevant columns
+        df = df.drop(["Student_ID", "Gender", "Parental_Education_Level"], axis=1)
+        
+        # Encode categorical variables
+        target_encoder = OrdinalEncoder()
+        feature_encoder = OrdinalEncoder()
+        
         target = "Passed"
-        df[[target]] = Encoded.fit_transform(df[[target]])
-
-        # Step3 - train test and split
-        X = df[num_cols]
+        df[[target]] = target_encoder.fit_transform(df[[target]])
+        
+        categorical_cols = [
+                "Internet_Access_at_Home",
+                "Extracurricular_Activities"
+        ]
+        df[categorical_cols] = feature_encoder.fit_transform(df[categorical_cols])
+        
+        # Split features and target
+        features = [
+                "Study_Hours_per_Week",
+                "Attendance_Rate",
+                "Past_Exam_Scores",
+                "Final_Exam_Score",
+                "Internet_Access_at_Home",
+                "Extracurricular_Activities"
+        ]
+        X = df[features]
         y = df[target]
-
-        X_train , X_test , y_train , y_test = train_test_split( X, y, test_size=0.2, random_state=42)
-
-        # step4 - scaling
+        
+        # Train-test split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        # Scale features
         scaler = StandardScaler()
-        X_train[num_cols] = scaler.fit_transform(X_train[num_cols])
-        X_test[num_cols]  = scaler.transform(X_test[num_cols])
-
-        return X_train , X_test , y_train, y_test
+        X_train[features] = scaler.fit_transform(X_train[features])
+        X_test[features] = scaler.transform(X_test[features])
+        
+        return X_train, X_test, y_train, y_test, scaler, feature_encoder
