@@ -2,44 +2,41 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
 
+def cleaning(Dataframe):
+    df = Dataframe.copy()
+    # print(df.head(10))
+    # print(df.info())
 
-def cleaning(dataframe):
-        df = dataframe.copy()
-        
-        # Remove irrelevant columns
-        df = df.drop(["Student_ID", "Gender", "Parental_Education_Level"], axis=1)
-        
-        # Encode categorical variables
-        target_encoder = OrdinalEncoder()
-        feature_encoder = OrdinalEncoder()
-        
-        target = "Passed"
-        df[[target]] = target_encoder.fit_transform(df[[target]])
-        
-        categorical_cols = [
-                "Internet_Access_at_Home",
-                "Extracurricular_Activities"
-        ]
-        df[categorical_cols] = feature_encoder.fit_transform(df[categorical_cols])
-        
-        # Split features and target
-        features = [
-                "Study_Hours_per_Week",
-                "Attendance_Rate",
-                "Past_Exam_Scores",
-                "Final_Exam_Score",
-                "Internet_Access_at_Home",
-                "Extracurricular_Activities"
-        ]
-        X = df[features]
-        y = df[target]
-        
-        # Train-test split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        # Scale features
-        scaler = StandardScaler()
-        X_train[features] = scaler.fit_transform(X_train[features])
-        X_test[features] = scaler.transform(X_test[features])
-        
-        return X_train, X_test, y_train, y_test, scaler, feature_encoder
+    num_cols = df.select_dtypes(include=['number']).columns
+    cat_cols = df.select_dtypes(include=['object', 'string']).columns
+    target = "Exam_Score"
+    num_cols = num_cols.drop(target)
+
+    # step 1- Filling missing values.
+    df[cat_cols] = df[cat_cols].fillna("Unknown")
+
+    # print(df.head())
+    # print(df.isnull().sum())
+
+    # step 2- encoding
+    cat_encoder = OrdinalEncoder()
+    df[cat_cols] = cat_encoder.fit_transform(df[cat_cols])
+
+    # print(df.head())
+
+    # Step 3- Splitting Data
+    feature = df.drop(target, axis = 1)
+    X = feature
+    y = df[target]
+
+    X_train , X_test , y_train, y_test = train_test_split(X, y, test_size= 0.2, random_state=42)
+
+    # Step 4- Scaling Data
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    X_train = pd.DataFrame(X_train, columns=X_train.columns)
+    X_test = pd.DataFrame(X_test, columns=X_test.columns)
+
+    return X_train, X_test, y_train, y_test, scaler, cat_encoder

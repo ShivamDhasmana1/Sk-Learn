@@ -1,33 +1,47 @@
 import pandas as pd
-from data_preprocessing import cleaning
-from sklearn.preprocessing import OrdinalEncoder, StandardScaler
-from sklearn.metrics import classification_report
-from sklearn.linear_model import LogisticRegression
+from Data_preprocessing import cleaning
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import  mean_absolute_error, mean_squared_error, r2_score
 
-df = pd.read_csv("Data-Driven Student Performance Evaluation/student_ml_practice.csv")
-X_train, X_test, y_train, y_test, scaler, encoder = cleaning(df)
+df = pd.read_csv(r"Data-Driven Student Performance Evaluation\StudentPerformanceFactors.csv")
 
-model = LogisticRegression()
-model.fit(X_train,y_train)
+X_train, X_test, y_train, y_test, scaler, cat_encoder = cleaning(df)
+
+model = LinearRegression()
+
+model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
 
-# print("Classification Report: ")
-# print(classification_report(y_test,y_pred))
+# print("MAE:", mean_absolute_error(y_test, y_pred))
+# print("MSE:", mean_squared_error(y_test, y_pred))
+# print("R2 Score:", r2_score(y_test, y_pred))
 
-
-new_student = pd.DataFrame({
-                "Study_Hours_per_Week": [float(input("Enter Study Hours per Week "))],
-                "Attendance_Rate": [float(input("Enter Attendance Rate "))],
-                "Past_Exam_Scores" : [float(input("Enter Past Exam Scores "))],
-                "Final_Exam_Score":[float(input("Enter Final Exam Score "))],
-                "Internet_Access_at_Home": [input("Enter Internet Access at Home ").capitalize()],
-                "Extracurricular_Activities" :[input("Enter Extracurricular Activities ").capitalize()]
+students = pd.DataFrame({
+    'Hours_Studied': [10, 20, 30],
+    'Attendance': [60, 80, 95],
+    'Parental_Involvement': ['Low', 'Medium', 'High'],
+    'Access_to_Resources': ['Low', 'Medium', 'High'],
+    'Extracurricular_Activities': ['No', 'Yes', 'Yes'],
+    'Sleep_Hours': [5, 6, 8],
+    'Previous_Scores': [50, 65, 85],
+    'Motivation_Level': ['Low', 'Medium', 'High'],
+    'Internet_Access': ['No', 'Yes', 'Yes'],
+    'Tutoring_Sessions': [0, 1, 3],
+    'Family_Income': ['Low', 'Medium', 'High'],
+    'Teacher_Quality': ['Low', 'Medium', 'High'],
+    'School_Type': ['Public', 'Public', 'Private'],
+    'Peer_Influence': ['Negative', 'Neutral', 'Positive'],
+    'Physical_Activity': [2, 4, 6],
+    'Learning_Disabilities': ['No', 'No', 'No'],
+    'Parental_Education_Level': ['High School', 'College', 'Postgraduate'],
+    'Distance_from_Home': ['Far', 'Moderate', 'Near'],
+    'Gender': ['Male', 'Female', 'Male']
 })
-new_student[["Internet_Access_at_Home", "Extracurricular_Activities"]] = encoder.transform(new_student[["Internet_Access_at_Home", "Extracurricular_Activities"]])
-scaled_new_student = pd.DataFrame(scaler.transform(new_student), columns=new_student.columns)
-prediction = model.predict(scaled_new_student)[0]
-if prediction:
-    print("Student is likely to Pass")
-else:
-    print("Student is likely to not Pass")
+cat_cols = df.select_dtypes(include=['object', 'string']).columns
+num_cols = df.select_dtypes(include=['number']).columns
+students[cat_cols] = cat_encoder.transform(students[cat_cols])
+students_scaled = scaler.transform(students)
+
+new_student_prediction = model.predict(students)
+print(f"Predicted Performance Score: {new_student_prediction[0]:.2f}")
