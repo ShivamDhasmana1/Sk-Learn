@@ -19,8 +19,7 @@ def cleaning(Dataframe):
     # print(df.isnull().sum())
 
     # step 2- encoding
-    cat_encoder = OrdinalEncoder()
-    df[cat_cols] = cat_encoder.fit_transform(df[cat_cols])
+    df = pd.get_dummies(df, columns=cat_cols, drop_first=True)
 
     # print(df.head())
 
@@ -33,10 +32,13 @@ def cleaning(Dataframe):
 
     # Step 4- Scaling Data
     scaler = StandardScaler()
+
+    cols = X_train.columns
+
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
 
-    X_train = pd.DataFrame(X_train, columns=X_train.columns)
-    X_test = pd.DataFrame(X_test, columns=X_test.columns)
+    X_train = pd.DataFrame(X_train, columns=cols)
+    X_test = pd.DataFrame(X_test, columns=cols)
 
-    return X_train, X_test, y_train, y_test, scaler, cat_encoder
+    return X_train, X_test, y_train, y_test, scaler, X_train.columns
